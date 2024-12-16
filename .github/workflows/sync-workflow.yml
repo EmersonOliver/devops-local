@@ -1,18 +1,36 @@
-name: Sync Workflow
+name: Sync Workflow to Target Repository
 
 on:
-  workflow_dispatch: # Permite rodar manualmente o workflow
+  workflow_dispatch: # Permite executar o workflow manualmente com parâmetros
+    inputs:
+      repository_name:
+        description: "Nome do repositório alvo (ex.: usuario/repo)"
+        required: true
+        default: ""
 
 jobs:
-  sync-files:
+  sync-to-repo:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Exibir mensagem de início
-        run: echo "Iniciando o processo de sincronização."
+      # Configurar o Git
+      - name: Configurar Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Listar arquivos no repositório
-        run: ls -la
+      # Clonar o repositório alvo
+      - name: Clonar repositório alvo
+        env:
+          GH_TOKEN: ${{ secrets.WRKFLOW_TOKEN }}
+        run: |
+          git clone https://x-access-token:${GH_TOKEN}@github.com/${{ inputs.repository_name }} target-repo
+          cd target-repo
 
-      - name: Finalizar workflow
-        run: echo "Sincronização concluída com sucesso!"
+      # Sincronizar arquivos
+      - name: Sincronizar arquivos
+        run: |
+          cp -R ../.github . # Exemplo: copia a pasta de workflows
+          git add .
+          git commit -m "Sincronizando workflows padrão"
+          git push origin main || echo "Nenhuma mudança detectada, nada para sincronizar."
