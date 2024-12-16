@@ -1,26 +1,37 @@
-name: Sync Workflow to New Repos
+name: Sync Workflows to Repos
 
 on:
-  repository:
-    types: [created]
+  schedule:
+    # Executa a cada 12 horas
+    - cron: '0 */12 * * *'
 
 jobs:
   sync-workflows:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout central repo
-      uses: actions/checkout@v3
-
-    - name: Push workflows to new repo
+    - name: List repositories in the organization
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        git clone https://x-access-token:${GH_TOKEN}@github.com/${{ github.event.repository.full_name }} new-repo
-        cd new-repo
-        cp -R ../.github .
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add .github
-        git commit -m "Add default workflows"
-        git push
+        curl -H "Authorization: token $GH_TOKEN" \
+             -H "Accept: application/vnd.github.v3+json" \
+             https://api.github.com/orgs/YOUR_ORG_NAME/repos \
+             | jq -r '.[].name' > repos.txt
+
+    - name: Clone and sync workflows
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        while read repo; do
+          git clone https://x-access-token:${GH_TOKEN}@github.com/YOUR_ORG_NAME/$repo temp-repo
+          cd temp-repo
+          cp -R ../.github .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github
+          git commit -m "Add default workflows"
+          git push || echo "Workflows already exist in $repo"
+          cd ..
+          rm -rf temp-repo
+        done < repos.txt
