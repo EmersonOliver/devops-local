@@ -30,7 +30,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.WRKFLOW_TOKEN }}
         run: |
-          git clone https://x-access-token:${GH_TOKEN}@github.com/EmersonOliver${{ inputs.repository_name }} target-repo
+          git clone https://x-access-token:${GH_TOKEN}@github.com/EmersonOliver/${{ inputs.repository_name }} target-repo
           cd target-repo
           git checkout ${{ inputs.branch }} || git checkout -b ${{ inputs.branch }}
         
