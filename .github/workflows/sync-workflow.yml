@@ -1,7 +1,7 @@
 name: Sync Workflow to Target Repository
 
 on:
-  workflow_dispatch: # Permite executar o workflow manualmente com parâmetros
+  workflow_dispatch: 
     inputs:
       repository_name:
         description: "Nome do repositório alvo (ex.: usuario/repo)"
@@ -13,13 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Configurar o Git
       - name: Configurar Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      # Clonar o repositório alvo
       - name: Clonar repositório alvo
         env:
           GH_TOKEN: ${{ secrets.WRKFLOW_TOKEN }}
@@ -27,10 +25,9 @@ jobs:
           git clone https://x-access-token:${GH_TOKEN}@github.com/${{ inputs.repository_name }} target-repo
           cd target-repo
 
-      # Sincronizar arquivos
       - name: Sincronizar arquivos
         run: |
-          cp -R ../.github . # Exemplo: copia a pasta de workflows
+          cp -R ../.github ./devops-quarkus/build.yml
           git add .
           git commit -m "Sincronizando workflows padrão"
           git push origin main || echo "Nenhuma mudança detectada, nada para sincronizar."

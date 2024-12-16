@@ -1,0 +1,35 @@
+name: Docker Image CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionName:
+        description: 'Version (ie 0.0.1)'
+        required: true
+      dockerRegistry:
+        description: 'applicationName'
+
+
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    needs: create_release_branch
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker Login
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      - name: Criando Imagem docker
+        run: |
+          docker build -t ${{ github.event.inputs.dockerRegistry }}:latest -t ${{ github.event.inputs.dockerRegistry }}:${{ github.event.inputs.versionName }} ./
+
+      - name: Docker Push latest
+        run: docker push ${{ github.event.inputs.dockerRegistry }}:latest
+
+      - name: Docker Push versioned
+        run: docker push eaoliveira5${{ github.event.inputs.dockerRegistry }}:${{ github.event.inputs.versionName }}
