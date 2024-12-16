@@ -17,12 +17,37 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Clonar repositório de origem (devops-local)
+        env:
+          GH_TOKEN: ${{ secrets.WRKFLOW_TOKEN }}
+        run: |
+          git clone https://x-access-token:${GH_TOKEN}@github.com/EmersonOliver/devops-local source-repo
+          cd source-repo
+          echo "Arquivos disponíveis para sincronização:"
+          ls -la
+       # Clonar o repositório de destino
+      - name: Clonar repositório de destino
+        env:
+          GH_TOKEN: ${{ secrets.WRKFLOW_TOKEN }}
+        run: |
+          git clone https://x-access-token:${GH_TOKEN}@github.com/${{ inputs.target_repository }} target-repo
+          cd target-repo
+          git checkout ${{ inputs.branch }} || git checkout -b ${{ inputs.branch }}
+        
+        # Sincronizar arquivos do repositório de origem para o destino
+      - name: Sincronizar arquivos
+        run: |
+          cp -R source-repo/* target-repo/
+          cd target-repo
+          git add .
+          git commit -m "Sincronizando arquivos do repositório devops-local"
+          git push origin ${{ inputs.branch }} || echo "Nenhuma mudança detectada, nada para sincronizar."
 
       - name: Clonar repositório alvo
         env:
           GH_TOKEN: ${{ secrets.WRKFLOW_TOKEN }}
         run: |
-          git clone https://x-access-token:${GH_TOKEN}@github.com/${{ inputs.repository_name }} target-repo
+          git clone https://x-access-token:${GH_TOKEN}@github.com/EmersonOliver${{ inputs.repository_name }} target-repo
           cd target-repo
 
       - name: Sincronizar arquivos
