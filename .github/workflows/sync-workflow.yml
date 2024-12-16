@@ -10,19 +10,19 @@ jobs:
     steps:
     - name: List repositories in the organization
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.WRKFLOW_TOKEN }}
       run: |
         curl -H "Authorization: token $GH_TOKEN" \
              -H "Accept: application/vnd.github.v3+json" \
-             https://api.github.com/orgs/YOUR_ORG_NAME/repos \
+             https://api.github.com/orgs/EmersonOliver/repos \
              | jq -r '.[].name' > repos.txt
 
     - name: Clone and sync workflows
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.WRKFLOW_TOKEN }}
       run: |
         while read repo; do
-          git clone https://x-access-token:${GH_TOKEN}@github.com/YOUR_ORG_NAME/$repo temp-repo
+          git clone https://x-access-token:${GH_TOKEN}@github.com/EmersonOliver/$repo temp-repo
           cd temp-repo
           cp -R ../.github .
           git config user.name "github-actions[bot]"
