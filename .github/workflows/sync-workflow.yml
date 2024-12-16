@@ -3,7 +3,7 @@ name: Sync Workflows to Repos
 on:
   schedule:
     # Executa a cada 12 horas
-    - cron: '0 */12 * * *'
+    - cron: '*/5 * * * *'
 
 jobs:
   sync-workflows:
