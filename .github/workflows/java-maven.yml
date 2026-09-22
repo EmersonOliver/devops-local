@@ -21,5 +21,7 @@ jobs:
 
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+      env:
+        URL_API: ${{ secrets.URL_API }}
      
   
